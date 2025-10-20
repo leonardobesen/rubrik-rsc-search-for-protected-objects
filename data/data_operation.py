@@ -29,8 +29,8 @@ def create_object_from_data(data: dict) -> ProtectedObject | None:
             id=data["id"],
             name=data["name"],
             object_type=data["objectType"],
-            sla_id=data.get("effectiveSlaDomain", {}).get("id"),
-            sla_name=data.get("effectiveSlaDomain", {}).get("name")
+            sla_id=data.get("effectiveSlaDomain", {}).get("id", ""),
+            sla_name=data.get("effectiveSlaDomain", {}).get("name", "")
         )
     except KeyError as e:
         logger.error(

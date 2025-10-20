@@ -8,13 +8,13 @@ import data.data_parser as data_parser
 logger = logging.getLogger(__name__)
 
 
-def show_menu(access_token: str):
-    """Show user a menu to select cluster(s)."""
+def show_menu(access_token: str) -> tuple[list[str], str | None]:
+    """Show user a menu to select cluster(s) and optionally filter by object type."""
     clusters = data_parser.get_all_cluster_info(access_token)
 
     if not clusters:
         print("No clusters available.")
-        return []
+        return [], None
 
     print("Select the numbers of clusters you want to search the objects (comma-separated for multiple):")
     for idx, cluster in enumerate(clusters):
@@ -26,15 +26,58 @@ def show_menu(access_token: str):
         selected_indices = [int(i.strip()) - 1 for i in selection.split(",")]
     except ValueError:
         print("Invalid input. Please enter only numbers separated by commas.")
-        return []
+        return [], None
 
     valid_indices = [i for i in selected_indices if 0 <= i < len(clusters)]
     if not valid_indices:
         print("No valid selections.")
-        return []
+        return [], None
 
     selected_ids = [clusters[i].id for i in valid_indices]
-    return selected_ids
+
+    # Ask if the user wants to filter by object type
+    filter_choice = input("Do you want to filter by a specific object type? (yes/no): ").strip().lower()
+
+    object_types = [
+        "PhysicalHost",
+        "Mssql",
+        "OracleDatabase",
+        "LinuxFileset",
+        "WindowsFileset",
+        "NasShare",
+        "VolumeGroup",
+        "ManagedVolume",
+        "MssqlInstance",
+        "OracleHost",
+        "ORACLE_DATA_GUARD_GROUP",
+        "MssqlAvailabilityGroup"
+    ]
+
+    if filter_choice in ["yes", "y"]:
+        print("\nAvailable Object Types:")
+        for idx, obj_type in enumerate(object_types, start=1):
+            print(f"{idx}. {obj_type}")
+
+        obj_selection = input("Type the number or name of the object type you want to filter: ").strip()
+
+        # Try numeric selection first
+        if obj_selection.isdigit():
+            obj_index = int(obj_selection) - 1
+            if 0 <= obj_index < len(object_types):
+                filter_object_type = object_types[obj_index]
+            else:
+                print("Invalid selection. No object type filter applied.")
+                filter_object_type = None
+        else:
+            if obj_selection in object_types:
+                filter_object_type = obj_selection
+            else:
+                print("Invalid object type name. No filter applied.")
+                filter_object_type = None
+    else:
+        filter_object_type = None
+
+    return selected_ids, filter_object_type
 
 
 def parse_csv_files():
@@ -82,9 +125,10 @@ def parse_csv_files():
 
 def search_list_objects(access_token: str,
                         selected_clusters: list[str],
-                        csv_data: str) -> list[ProtectedObject]:
+                        csv_data: str,
+                        filter_obj_type: str = None) -> list[ProtectedObject]:
     objects = data_parser.get_all_protected_objects(
-        access_token, selected_clusters, csv_data
+        access_token, selected_clusters, csv_data, filter_obj_type
     )
 
     return objects

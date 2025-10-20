@@ -2,7 +2,7 @@
 class ProtectedObject():
     def __init__(self, id: str,
                  name: str, object_type: str,
-                 sla_id: str, sla_name: str) -> None:
+                 sla_id: str = None, sla_name: str = None) -> None:
         self.id = id
         self.name = name
         self.object_type = object_type

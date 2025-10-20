@@ -35,7 +35,8 @@ def get_all_cluster_info(access_token: str) -> list[Cluster]:
 
 def get_all_protected_objects(access_token: str,
                               selected_clusters: list[str],
-                              csv_data: list) -> list[ProtectedObject]:
+                              csv_data: list,
+                              filter_object_type: str = None,) -> list[ProtectedObject]:
     """Fetch all protected objects information"""
     protected_objects = []
 
@@ -55,7 +56,9 @@ def get_all_protected_objects(access_token: str,
 
         for item in nodes:
             protected_object = data_operation.create_object_from_data(item)
-            if protected_object:
+            if not protected_object:
+                continue
+            if not filter_object_type or \
+                protected_object.object_type.lower() == filter_object_type.lower():
                 protected_objects.append(protected_object)
-
     return protected_objects

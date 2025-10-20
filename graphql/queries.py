@@ -28,7 +28,7 @@ def all_cluster_info_query() -> tuple[str, dict]:
     return query, variables
 
 
-def search_object(name: str, cluster_ids: list[str]) -> tuple[str, dict]:
+def search_object(name: str, cluster_ids: list[str], is_relic: bool = False) -> tuple[str, dict]:
     variables = {
         "filter": [
             {
@@ -42,9 +42,9 @@ def search_object(name: str, cluster_ids: list[str]) -> tuple[str, dict]:
                 "texts": cluster_ids
             },
             {
-                "field": "IS_PROTECTED",
+                "field": "IS_RELIC",
                 "texts": [
-                    "true"
+                    f"{is_relic}"
                 ]
             },
             {
@@ -52,17 +52,11 @@ def search_object(name: str, cluster_ids: list[str]) -> tuple[str, dict]:
                 "texts": [
                     "false"
                 ]
-            },
-            {
-                "field": "IS_ACTIVE",
-                "texts": [
-                    "true"
-                ]
             }
         ],
         "sortBy": "NAME",
         "sortOrder": "ASC",
-        "first": 10
+        "first": 300
     }
 
     query = f"""query GlobalSearchObjectQuery($first: Int!, 
